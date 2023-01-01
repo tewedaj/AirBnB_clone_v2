@@ -1,21 +1,22 @@
 #!/usr/bin/python3
-"""web server distribution
-    """
+"""
+generates a .tgz archive from the contents of the web_static folder
+Usage:
+    fab -f 1-pack_web_static.py do_pack
+"""
 from fabric.api import local
-import tarfile
-import os.path
-import re
 from datetime import datetime
 
 
 def do_pack():
-    """distributes an archive to your web servers
+    """Generates .tgz archive from the contents of /web_static
+       returns archive's path if successful and None if not
     """
-    target = local("mkdir -p versions")
-    name = str(datetime.now()).replace(" ", '')
-    opt = re.sub(r'[^\w\s]', '', name)
-    tar = local('tar -cvzf versions/web_static_{}.tgz web_static'.format(opt))
-    if os.path.exists("./versions/web_static_{}.tgz".format(opt)):
-        return os.path.normpath("/versions/web_static_{}.tgz".format(opt))
-    else:
-        return None
+    now = datetime.now().strftime('%Y%m%d%H%M%S')
+    filePath = 'versions/web_static_{}.tgz'.format(now)
+
+    local('mkdir -p versions/')
+    createArchive = local('tar -cvzf {} web_static/'.format(filePath))
+
+    if createArchive.succeeded:
+        return filePath
